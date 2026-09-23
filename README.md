@@ -1,4 +1,5 @@
 📊 Malaysia Inclusive Economy Blueprint — Interactive Policy Simulator
+LINK: https://Downey112.github.io/malaysia-inclusive-economy-blueprint/
 
 An interactive, single-page economic policy simulator and data visualization dashboard modeling the heterodox policy architecture of Dr. Muhammed Abdul Khalid.
 
