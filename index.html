@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malaysia Inclusive Economy Blueprint — Interactive Policy Engine</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            800: '#92400e',
+                            900: '#78350f',
+                        },
+                        brand: {
+                            primary: '#9A3412', // Warm Rust / Terracotta
+                            dark: '#1E293B',    // Deep Slate
+                            bg: '#FDFBF7',      // Warm Off-White Sandstone
+                            emerald: '#059669', // Progressive Emerald
+                            accent: '#D97706',  // Amber Accent
+                            purple: '#6B21A8'   // Deep Purple
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['System-UI', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        serif: ['Georgia', 'Cambria', 'Times New Roman', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #9A3412;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-brand-bg text-slate-800 font-sans antialiased selection:bg-amber-200 selection:text-amber-900">
+
+    <!-- Chosen Palette: Warm Institutional Sandstone (#FDFBF7), Deep Slate (#1E293B), Warm Rust (#9A3412), Progressive Emerald (#059669), and Accent Amber (#D97706). -->
+
+    <!-- Application Structure Plan:
+         1. Header & Navigation: Fixed header with active module indicators and PDF/JSON summary export action.
+         2. Section 1: Empirical Background & DINA Inequality Explorer (Visualizing Top 10% vs Bottom 50% income/wealth shares from World Inequality Lab datasets).
+         3. Section 2: Fiscal Feasibility Engine (Interactive simulator calculating direct progressive revenue from CGT, Inheritance Tax, and High Pension Tax vs Regressive GST).
+         4. Section 3: Labor Market Equalizer & Hiring Bias Simulator (Minimum wage staircase to RM3,000 + interactive resume audit experiment visualizer based on Lee & Khalid 2016).
+         5. Section 4: PPR "Cash Plus" Urban Child Nutrition Planner (Budgeting tool for scaling direct cash + First 1,000 Days nutrition across low-cost housing).
+         6. Section 5: 13th Malaysia Plan Target Benchmark Scorecard (Interactive side-by-side comparison of official vs heterodox benchmarks).
+         7. Section 6: Action Plan Brief Generator (Dynamic modal exporting user-configured policy simulation results as a structured brief).
+         
+         WHY THIS STRUCTURE: Transforms complex, multi-source econometric report findings into an intuitive, interactive decision-making simulator. Users can directly experiment with variables (tax rates, exemption floors, annual wage increments, PPR coverage levels) to test the financial feasibility and social impact of Dr. Muhammed Abdul Khalid's heterodox proposals.
+    -->
+
+    <!-- Visualization & Content Choices:
+         1. DINA Wealth Share -> Goal: Demonstrate Structural Inequality -> Visual: Chart.js Line Chart -> Interaction: Dynamic Dataset View -> Justification: Establishes empirical justification for direct wealth taxation -> Library: Chart.js Canvas.
+         2. Fiscal Revenue Engine -> Goal: Test Tax Feasibility -> Visual: Stacked Bar Chart & Dynamic Revenue Metrics -> Interaction: Sliders for tax rates & thresholds -> Justification: Proves progressive taxation generates viable public revenue to replace regressive GST -> Library: Chart.js Canvas.
+         3. Minimum Wage Staircase -> Goal: Model Wage Floor Progression -> Visual: Line Chart -> Interaction: Slider for annual wage step-up -> Justification: Projects realistic timeline to hit the RM3,000 livable wage -> Library: Chart.js Canvas.
+         4. Job Audit Experiment -> Goal: Highlight Private Hiring Disparity -> Visual: Horizontal Bar Chart -> Interaction: Audit comparison view -> Justification: Replicates Lee & Khalid (2016) field experiment results -> Library: Chart.js Canvas.
+         5. PPR Cash Plus Budget -> Goal: Plan Poverty Program -> Visual: Dynamic Multiplier Cards & Target Toggles -> Interaction: Select scope (DBKL vs National) -> Justification: Quantifies exact investment required to eliminate urban child stunting -> Library: Vanilla JS DOM.
+         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="text-2xl font-serif font-bold text-brand-primary tracking-tight">MAK</span>
+                    <span class="text-xs font-semibold uppercase tracking-wider bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full border border-amber-200">
+                        Inclusive Economy Project
+                    </span>
+                </div>
+                <nav class="hidden md:flex space-x-6 text-xs font-medium text-slate-600">
+                    <a href="#dina-overview" class="hover:text-brand-primary transition-colors">Inequality Data</a>
+                    <a href="#fiscal-engine" class="hover:text-brand-primary transition-colors">Fiscal Engine</a>
+                    <a href="#labor-market" class="hover:text-brand-primary transition-colors">Wages & Hiring</a>
+                    <a href="#cash-plus" class="hover:text-brand-primary transition-colors">PPR Cash Plus</a>
+                    <a href="#scorecard-13mp" class="hover:text-brand-primary transition-colors">13MP Scorecard</a>
+                </nav>
+                <div class="flex items-center space-x-3">
+                    <button onclick="exportPolicyBrief()" class="px-3.5 py-1.5 text-xs font-bold bg-brand-primary text-white rounded-lg shadow hover:bg-amber-900 transition-all flex items-center space-x-1">
+                        <span>📄 Export Policy Brief</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Hero Banner -->
+        <section class="bg-gradient-to-r from-slate-900 via-brand-dark to-stone-900 text-white rounded-2xl p-6 sm:p-10 shadow-xl relative overflow-hidden">
+            <div class="max-w-3xl relative z-10 space-y-4">
+                <div class="inline-flex items-center space-x-2 bg-amber-500/20 backdrop-blur-md px-3 py-1 rounded-full text-amber-200 text-xs font-semibold uppercase tracking-wider border border-amber-500/30">
+                    <span>Econometric Policy Simulator</span>
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-serif font-bold tracking-tight leading-tight">
+                    Malaysia Inclusive Economy Blueprint
+                </h1>
+                <p class="text-stone-300 text-xs sm:text-base font-light leading-relaxed">
+                    An interactive policy research platform translating the econometric findings of <strong>Dr. Muhammed Abdul Khalid</strong> into executable fiscal, labor, social protection, and national target simulations.
+                </p>
+                <div class="pt-2 flex flex-wrap gap-2 text-xs font-medium text-stone-300">
+                    <span class="bg-white/10 px-3 py-1 rounded-lg border border-white/10">✓ Distributional National Accounts</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-lg border border-white/10">✓ Direct Tax Revenue Simulator</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-lg border border-white/10">✓ Graduate Hiring Experiment Data</span>
+                    <span class="bg-white/10 px-3 py-1 rounded-lg border border-white/10">✓ PPR Urban Nutrition Planner</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Executive Action Pillars Overview -->
+        <section class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-serif font-bold text-slate-850">Core Proposal Action Pillars</h2>
+                    <p class="text-xs sm:text-sm text-slate-600">The primary structural interventions designed to address wealth concentration and low-wage precarity.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm space-y-2">
+                    <div class="text-brand-primary font-bold text-2xl">01</div>
+                    <h3 class="font-bold text-slate-850 text-sm">Progressive Direct Taxation</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Implement Inheritance Duty on multi-million estates, Capital Gains Tax on shares, and tax elite public pensions to replace regressive consumption taxes (GST).
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm space-y-2">
+                    <div class="text-brand-emerald font-bold text-2xl">02</div>
+                    <h3 class="font-bold text-slate-850 text-sm">Livable Wages & Fair Hiring</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Mandate annual minimum wage increases toward a RM3,000 floor, paired with mandatory ethnic-blind resume screening in entry-level hiring.
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm space-y-2">
+                    <div class="text-blue-700 font-bold text-2xl">03</div>
+                    <h3 class="font-bold text-slate-850 text-sm">PPR "Cash Plus" Safety Net</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Combine direct cash transfers with mandatory maternal healthcare and child nutrition vouchers for low-income PPR public housing families.
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm space-y-2">
+                    <div class="text-purple-700 font-bold text-2xl">04</div>
+                    <h3 class="font-bold text-slate-850 text-sm">13MP Macro Targets</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Replace symbolic poverty drop goals with ambitious OECD-aligned equality benchmarks (Gini 0.320) and state-funded housing construction.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 0: DINA Inequality & Wealth Distribution Explorer -->
+        <section id="dina-overview" class="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+            <div class="max-w-3xl space-y-2">
+                <div class="inline-flex items-center space-x-2 text-amber-800 text-xs font-bold uppercase tracking-wider">
+                    <span>Empirical Background</span>
+                    <span>•</span>
+                    <span>World Inequality Database (DINA)</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-850">
+                    Distributional National Accounts (DINA) & Wealth Disparity
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    Research by Khalid & Yang (2019/2020) reveals that standard household income surveys understate economic inequality by omitting capital gains, undistributed corporate profits, and offshore asset holdings.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Line Chart: Income Share Divergence (7 cols) -->
+                <div class="lg:col-span-7 bg-stone-50 p-5 rounded-xl border border-stone-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-slate-850 text-sm">Income Share Trajectory (2000–2025)</h3>
+                        <span class="text-xs font-mono text-slate-500">Top 10% vs Bottom 50%</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="dinaChart"></canvas>
+                    </div>
+                    <p class="text-[11px] text-slate-500 text-center mt-2">
+                        Data Source: Khalid & Yang (2019/2020) Distributional National Accounts for Malaysia.
+                    </p>
+                </div>
+
+                <!-- KPI Breakdown Cards (5 cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    <div class="p-5 bg-amber-50 rounded-xl border border-amber-200 text-amber-900 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs uppercase font-bold tracking-wider">Top 1% Wealth Share</span>
+                            <span class="text-2xl font-bold font-mono text-brand-primary">32.4%</span>
+                        </div>
+                        <p class="text-xs leading-relaxed text-amber-800">
+                            The richest 1% holds nearly one-third of all total private national wealth in Malaysia, while bearing negligible liability under consumption tax regimes.
+                        </p>
+                    </div>
+
+                    <div class="p-5 bg-stone-100 rounded-xl border border-stone-200 text-slate-800 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs uppercase font-bold tracking-wider text-slate-600">Bottom 50% Wealth Share</span>
+                            <span class="text-2xl font-bold font-mono text-slate-900">3.2%</span>
+                        </div>
+                        <p class="text-xs leading-relaxed text-slate-600">
+                            The bottom half of Malaysian society holds less than 3.5% of total wealth, leaving them vulnerable to inflation and regressive consumption taxes like GST.
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-slate-850 text-white rounded-xl text-xs space-y-1">
+                        <strong class="text-amber-300">Key Policy Implication:</strong>
+                        <p class="text-slate-300">
+                            Taxing labor and consumption while leaving capital stock untaxed expands structural wealth inequality.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 1: Fiscal Feasibility Engine -->
+        <section id="fiscal-engine" class="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+            <div class="max-w-3xl space-y-2">
+                <div class="inline-flex items-center space-x-2 text-brand-primary text-xs font-bold uppercase tracking-wider">
+                    <span>Interactive Module 01</span>
+                    <span>•</span>
+                    <span>Fiscal Reform Simulator</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-850">
+                    Progressive Direct Wealth Taxation Engine
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    This interactive simulator models federal revenue yields generated by introducing a Capital Gains Tax (CGT), an Inheritance Duty on multi-million estates, and high pension surcharges, contrasted against a 6% GST reinstatement.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Controls (5 cols) -->
+                <div class="lg:col-span-5 bg-stone-50 p-6 rounded-xl border border-stone-200 space-y-5">
+                    <h3 class="font-bold text-slate-850 text-sm border-b border-stone-200 pb-2">Policy Tax Controls</h3>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-bold text-slate-700">
+                            <label for="cgt-rate">Capital Gains Tax Rate (Share Market):</label>
+                            <span id="cgt-val" class="text-brand-primary font-mono font-bold">10%</span>
+                        </div>
+                        <input id="cgt-rate" type="range" min="0" max="20" step="1" value="10" oninput="calculateFiscalEngine()" class="w-full custom-slider bg-stone-200 rounded-lg h-2">
+                        <p class="text-[10px] text-slate-500">Taxes corporate and share capital gains currently exempt from income tax.</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-bold text-slate-700">
+                            <label for="inheritance-exemption">Inheritance Tax Threshold (RM Million):</label>
+                            <span id="inheritance-val" class="text-brand-primary font-mono font-bold">RM 5M+</span>
+                        </div>
+                        <input id="inheritance-exemption" type="range" min="2" max="10" step="1" value="5" oninput="calculateFiscalEngine()" class="w-full custom-slider bg-stone-200 rounded-lg h-2">
+                        <p class="text-[10px] text-slate-500">Exempts working-class households; applies strictly to super-rich multi-million estates.</p>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs font-bold text-slate-700">
+                            <label for="pension-tax">Elite Public Pension Tax (>RM5,000/mo):</label>
+                            <span id="pension-val" class="text-brand-primary font-mono font-bold">15%</span>
+                        </div>
+                        <input id="pension-tax" type="range" min="0" max="25" step="5" value="15" oninput="calculateFiscalEngine()" class="w-full custom-slider bg-stone-200 rounded-lg h-2">
+                        <p class="text-[10px] text-slate-500">Taxes high public pensions to curb top-tier rent-seeking expenditure.</p>
+                    </div>
+
+                    <div class="p-4 bg-brand-dark text-white rounded-xl space-y-1">
+                        <p class="text-[10px] uppercase font-bold text-amber-300 tracking-wider">Simulated Annual Progressive Revenue</p>
+                        <p id="total-revenue-display" class="text-2xl font-bold font-mono">RM 24.7 Billion</p>
+                        <p class="text-[10px] text-slate-300">Sufficient to fund child nutrition and social safety nets without taxing working families.</p>
+                    </div>
+                </div>
+
+                <!-- Visualization Stacked Bar Chart (7 cols) -->
+                <div class="lg:col-span-7 bg-stone-50 p-5 rounded-xl border border-stone-200">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="font-bold text-slate-850 text-sm">Revenue Yield Comparison (RM Billion / Year)</h4>
+                        <span class="text-xs font-mono text-slate-500">Progressive vs Regressive</span>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="fiscalChart"></canvas>
+                    </div>
+
+                    <p class="text-xs text-slate-500 text-center mt-3">
+                        Direct wealth taxation collects revenue from excess capital accumulation rather than depressing household retail consumption.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 2: Wage Staircase & Fair Hiring Equalizer -->
+        <section id="labor-market" class="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+            <div class="max-w-3xl space-y-2">
+                <div class="inline-flex items-center space-x-2 text-brand-emerald text-xs font-bold uppercase tracking-wider">
+                    <span>Interactive Module 02</span>
+                    <span>•</span>
+                    <span>Labor & Discrimination Policy</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-850">
+                    Minimum Wage Staircase & Job Callback Equalizer
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    This section models the annual step-up roadmap toward a RM3,000 living wage floor and presents field audit data on private sector entry-level graduate hiring bias.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Wage Chart (7 cols) -->
+                <div class="lg:col-span-7 bg-stone-50 p-5 rounded-xl border border-stone-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-850 text-sm">Wage Floor Escalation vs. Livable Cost Baseline</h4>
+                        <span class="text-xs font-mono text-slate-500">2025 – 2031 Path</span>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="wageChart"></canvas>
+                    </div>
+
+                    <div class="text-xs text-slate-600 flex justify-around border-t border-stone-200 pt-3">
+                        <div><strong>Target Year for RM3,000:</strong> <span id="target-year-display" class="font-bold text-brand-emerald">2031</span></div>
+                        <div><strong>Total Growth:</strong> <span id="total-wage-increase" class="font-bold text-brand-emerald">+76.5%</span></div>
+                    </div>
+                </div>
+
+                <!-- Simulation Controls & Audit Data (5 cols) -->
+                <div class="lg:col-span-5 space-y-5">
+                    <div class="bg-stone-50 p-5 rounded-xl border border-stone-200 space-y-4">
+                        <h3 class="font-bold text-slate-850 text-sm border-b border-stone-200 pb-2">Wage Policy Controls</h3>
+                        <div class="space-y-1.5">
+                            <div class="flex justify-between text-xs font-bold text-slate-700">
+                                <label for="annual-increment">Annual Minimum Wage Increment:</label>
+                                <span id="increment-val" class="text-brand-emerald font-mono font-bold">RM 200 / year</span>
+                            </div>
+                            <input id="annual-increment" type="range" min="100" max="350" step="25" value="200" oninput="calculateWageRoadmap()" class="w-full custom-slider bg-stone-200 rounded-lg h-2">
+                        </div>
+                    </div>
+
+                    <!-- Hiring Bias Visualizer -->
+                    <div class="bg-emerald-50/70 p-5 rounded-xl border border-emerald-200 space-y-3 text-xs">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-emerald-900">Graduate Hiring Audit Callback Experiment</h4>
+                            <span class="text-[10px] font-mono text-emerald-700">Lee & Khalid (2016)</span>
+                        </div>
+                        <p class="text-emerald-800 leading-relaxed">
+                            A field experiment sending identical resumes showed Malay graduates face a <strong>5.3x lower callback rate</strong> in Chinese-owned private firms compared to Chinese applicants.
+                        </p>
+                        <div class="chart-container" style="height: 160px;">
+                            <canvas id="auditChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 3: PPR "Cash Plus" Urban Poverty Action Planner -->
+        <section id="cash-plus" class="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+            <div class="max-w-3xl space-y-2">
+                <div class="inline-flex items-center space-x-2 text-blue-700 text-xs font-bold uppercase tracking-wider">
+                    <span>Interactive Module 03</span>
+                    <span>•</span>
+                    <span>Urban Social Safety Net</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-850">
+                    PPR "Cash Plus" Child Malnutrition & Poverty Action Planner
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    Based on <em>Living on the Edge</em> longitudinal study findings (UNICEF / DM Analytics). Calculate the budget required to expand direct cash transfers and maternal child nutrition support across urban public low-cost flats (PPR).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Target Scope Selector -->
+                <div class="bg-stone-50 p-5 rounded-xl border border-stone-200 space-y-4">
+                    <h3 class="font-bold text-slate-850 text-sm">1. Target Beneficiary Scope</h3>
+                    <div class="space-y-2 text-xs">
+                        <label class="flex items-center space-x-2 p-2.5 bg-white rounded-lg border border-stone-200 cursor-pointer">
+                            <input type="radio" name="cash-scope" value="dbkl" checked onchange="updateCashPlusPlanner()" class="text-brand-primary">
+                            <span><strong>DBKL KL Only</strong> (~5,000 Mothers/Infants)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2.5 bg-white rounded-lg border border-stone-200 cursor-pointer">
+                            <input type="radio" name="cash-scope" value="urban-key" onchange="updateCashPlusPlanner()" class="text-brand-primary">
+                            <span><strong>KL + Penang + Johor</strong> (~18,000 Families)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2.5 bg-white rounded-lg border border-stone-200 cursor-pointer">
+                            <input type="radio" name="cash-scope" value="national" onchange="updateCashPlusPlanner()" class="text-brand-primary">
+                            <span><strong>Nationwide PPR Scope</strong> (~60,000 Families)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Monthly Support Value -->
+                <div class="bg-stone-50 p-5 rounded-xl border border-stone-200 space-y-4">
+                    <h3 class="font-bold text-slate-850 text-sm">2. Monthly Cash Transfer</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs font-bold text-slate-700">
+                            <label>Transfer Per Family:</label>
+                            <span id="cash-transfer-val" class="text-brand-primary font-mono font-bold">RM 300 / mo</span>
+                        </div>
+                        <input id="cash-transfer-slider" type="range" min="200" max="600" step="50" value="300" oninput="updateCashPlusPlanner()" class="w-full custom-slider bg-stone-200 rounded-lg h-2">
+                        <p class="text-[10px] text-slate-500">Includes mandatory maternal healthcare & child nutrition vouchers.</p>
+                    </div>
+                </div>
+
+                <!-- Program Cost Output -->
+                <div class="bg-slate-850 text-white p-5 rounded-xl space-y-3 flex flex-col justify-between">
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-amber-300 tracking-wider">Required Annual Budget</p>
+                        <p id="cash-plus-budget-display" class="text-3xl font-bold font-mono mt-1">RM 18.0 Million</p>
+                        <p id="cash-plus-scope-desc" class="text-xs text-slate-300 mt-2">
+                            Covers 5,000 DBKL PPR pregnant mothers with RM300/mo cash + nutritional healthcare services.
+                        </p>
+                    </div>
+                    <div class="p-2.5 bg-white/10 rounded-lg text-[11px] text-amber-100/90 border border-white/10">
+                        <strong>Impact:</strong> Directly targets the 21.8% child stunting rate in urban low-cost flats.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 4: 13MP Target Scorecard -->
+        <section id="scorecard-13mp" class="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+            <div class="max-w-3xl space-y-2">
+                <div class="inline-flex items-center space-x-2 text-purple-700 text-xs font-bold uppercase tracking-wider">
+                    <span>Interactive Module 04</span>
+                    <span>•</span>
+                    <span>13MP Macro Targets</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-slate-850">
+                    13th Malaysia Plan (13MP) Target Scorecard
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    A comparison matrix contrasting official government targets with Dr. Muhammed Abdul Khalid’s heterodox benchmarks for poverty reduction, income equality, and public housing delivery.
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead>
+                        <tr class="bg-slate-850 text-white border-b border-slate-700">
+                            <th class="p-3 sm:p-4 rounded-tl-xl">Policy Metric</th>
+                            <th class="p-3 sm:p-4">Official 13MP Target</th>
+                            <th class="p-3 sm:p-4 text-brand-primary bg-amber-950/40 font-bold">Dr. Muhammed's Target</th>
+                            <th class="p-3 sm:p-4 rounded-tr-xl">Critique & Rationale</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-stone-200 border-b border-stone-200">
+                        <tr class="hover:bg-stone-50">
+                            <td class="p-3 sm:p-4 font-bold text-slate-800">Absolute Poverty Rate</td>
+                            <td class="p-3 sm:p-4 text-slate-600">5.8% ➔ 4.7% (-1.1%)</td>
+                            <td class="p-3 sm:p-4 font-bold text-emerald-700 bg-amber-50/50">&lt; 2.5% Absolute Floor</td>
+                            <td class="p-3 sm:p-4 text-xs text-slate-600">A 1.1% drop over 5 years lacks ambition for an aspiring high-income nation.</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50">
+                            <td class="p-3 sm:p-4 font-bold text-slate-800">Income Inequality (Gini)</td>
+                            <td class="p-3 sm:p-4 text-slate-600">0.390 ➔ 0.386 (-0.004)</td>
+                            <td class="p-3 sm:p-4 font-bold text-emerald-700 bg-amber-50/50">0.320 (OECD Benchmark)</td>
+                            <td class="p-3 sm:p-4 text-xs text-slate-600">Symbolic 0.004 drop fails to address structural capital-labor divides.</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50">
+                            <td class="p-3 sm:p-4 font-bold text-slate-800">Development Expenditure</td>
+                            <td class="p-3 sm:p-4 text-slate-600">RM430b (+RM15b over 12MP)</td>
+                            <td class="p-3 sm:p-4 font-bold text-emerald-700 bg-amber-50/50">Direct Public Capital Build</td>
+                            <td class="p-3 sm:p-4 text-xs text-slate-600">+RM3b/yr increase is inadequate for public schools, clinics, and social housing.</td>
+                        </tr>
+                        <tr class="hover:bg-stone-50">
+                            <td class="p-3 sm:p-4 font-bold text-slate-800">Public Housing Delivery</td>
+                            <td class="p-3 sm:p-4 text-slate-600">Relies on Private/GLC Off-take</td>
+                            <td class="p-3 sm:p-4 font-bold text-emerald-700 bg-amber-50/50">Direct State Build Program</td>
+                            <td class="p-3 sm:p-4 text-xs text-slate-600">Market mechanisms fail to deliver genuinely affordable homes to urban poor.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Policy Brief Export Modal -->
+    <div id="exportModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 space-y-5 shadow-2xl border border-stone-200">
+            <div class="flex justify-between items-center border-b border-stone-200 pb-3">
+                <h3 class="font-serif font-bold text-xl text-slate-850">Generated Policy Implementation Brief</h3>
+                <button onclick="closeExportModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            </div>
+            <div id="modalBriefContent" class="text-xs space-y-3 font-mono bg-stone-50 p-4 rounded-xl border border-stone-200 text-slate-800 max-h-96 overflow-y-auto">
+                <!-- Dynamically populated via JS -->
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+                <button onclick="closeExportModal()" class="px-4 py-2 text-xs font-bold text-slate-600 bg-stone-200 rounded-lg">Close</button>
+                <button onclick="window.print()" class="px-4 py-2 text-xs font-bold text-white bg-brand-primary rounded-lg shadow hover:bg-amber-900">Print / Save as PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-850 text-white mt-16 py-10 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 text-center md:text-left">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-serif font-bold text-base text-amber-200">Malaysia Inclusive Economy Blueprint</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Interactive Policy Implementation Engine • Inspired by Dr. Muhammed Abdul Khalid's Research</p>
+                </div>
+                <div class="text-xs text-slate-400 space-x-3">
+                    <span>Tax Reform</span>
+                    <span>•</span>
+                    <span>Livable Wages</span>
+                    <span>•</span>
+                    <span>PPR Child Safety Nets</span>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-4 text-[11px] text-slate-500 text-center">
+                Interactive portfolio project generated for economic policy research and academic presentation purposes.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let dinaChartInstance = null;
+        let fiscalChartInstance = null;
+        let wageChartInstance = null;
+        let auditChartInstance = null;
+
+        // Init DINA Chart
+        function initDinaChart() {
+            const ctx = document.getElementById('dinaChart').getContext('2d');
+            dinaChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2000', '2005', '2010', '2015', '2020', '2025'],
+                    datasets: [
+                        {
+                            label: 'Top 10% Income Share (%)',
+                            data: [42.1, 44.5, 46.2, 47.8, 48.5, 49.2],
+                            borderColor: '#9A3412',
+                            backgroundColor: 'rgba(154, 52, 18, 0.1)',
+                            fill: true,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Bottom 50% Income Share (%)',
+                            data: [20.7, 18.7, 17.7, 16.7, 16.4, 16.0],
+                            borderColor: '#1E293B',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    scales: {
+                        y: { ticks: { callback: v => v + '%' } }
+                    }
+                }
+            });
+        }
+
+        // Init Fiscal Chart
+        function initFiscalChart() {
+            const ctx = document.getElementById('fiscalChart').getContext('2d');
+            fiscalChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Proposed Direct Package', 'GST Reinstatement (6%)'],
+                    datasets: [
+                        { label: 'Capital Gains Tax (Share Market)', data: [12.5, 0], backgroundColor: '#9A3412' },
+                        { label: 'Inheritance Tax (Super-Rich Estates)', data: [8.0, 0], backgroundColor: '#D97706' },
+                        { label: 'High Pension Tax (>RM5k/mo)', data: [4.2, 0], backgroundColor: '#059669' },
+                        { label: 'GST Working Class Revenue', data: [0, 63.5], backgroundColor: '#64748B' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } },
+                        tooltip: { callbacks: { label: c => `${c.dataset.label}: RM ${c.parsed.y} Billion` } }
+                    },
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true, ticks: { callback: v => 'RM ' + v + 'B' } }
+                    }
+                }
+            });
+        }
+
+        function calculateFiscalEngine() {
+            const cgtRate = parseInt(document.getElementById('cgt-rate').value);
+            const inheritanceExemption = parseInt(document.getElementById('inheritance-exemption').value);
+            const pensionTax = parseInt(document.getElementById('pension-tax').value);
+
+            document.getElementById('cgt-val').innerText = cgtRate + '%';
+            document.getElementById('inheritance-val').innerText = 'RM ' + inheritanceExemption + 'M+';
+            document.getElementById('pension-val').innerText = pensionTax + '%';
+
+            const cgtRev = parseFloat((cgtRate * 1.25).toFixed(1));
+            const inheritanceRev = parseFloat(((12 - inheritanceExemption) * 1.6).toFixed(1));
+            const pensionRev = parseFloat((pensionTax * 0.28).toFixed(1));
+
+            const totalRev = parseFloat((cgtRev + inheritanceRev + pensionRev).toFixed(1));
+
+            document.getElementById('total-revenue-display').innerText = `RM ${totalRev} Billion`;
+
+            fiscalChartInstance.data.datasets[0].data[0] = cgtRev;
+            fiscalChartInstance.data.datasets[1].data[0] = inheritanceRev;
+            fiscalChartInstance.data.datasets[2].data[0] = pensionRev;
+            fiscalChartInstance.update();
+        }
+
+        // Init Wage Chart
+        function initWageChart() {
+            const ctx = document.getElementById('wageChart').getContext('2d');
+            wageChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2025', '2026', '2027', '2028', '2029', '2030', '2031'],
+                    datasets: [
+                        {
+                            label: 'Minimum Wage Path (RM)',
+                            data: [1700, 1900, 2100, 2300, 2500, 2700, 2900],
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'PPR Living Baseline (RM)',
+                            data: [2700, 2750, 2800, 2850, 2900, 2950, 3000],
+                            borderColor: '#9A3412',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } } },
+                    scales: { y: { min: 1400, ticks: { callback: v => 'RM ' + v } } }
+                }
+            });
+        }
+
+        function calculateWageRoadmap() {
+            const incVal = parseInt(document.getElementById('annual-increment').value);
+            document.getElementById('increment-val').innerText = `RM ${incVal} / year`;
+
+            let startWage = 1700;
+            const wagePath = [startWage];
+
+            for (let i = 1; i < 7; i++) {
+                wagePath.push(startWage + (i * incVal));
+            }
+
+            wageChartInstance.data.datasets[0].data = wagePath;
+            wageChartInstance.update();
+
+            let targetIdx = wagePath.findIndex(w => w >= 3000);
+            if (targetIdx !== -1) {
+                document.getElementById('target-year-display').innerText = 2025 + targetIdx;
+            } else {
+                document.getElementById('target-year-display').innerText = 'After 2031';
+            }
+
+            const totalPct = (((wagePath[6] - 1700) / 1700) * 100).toFixed(1);
+            document.getElementById('total-wage-increase').innerText = `+${totalPct}%`;
+        }
+
+        // Init Hiring Audit Chart
+        function initAuditChart() {
+            const ctx = document.getElementById('auditChart').getContext('2d');
+            auditChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Chinese Applicant', 'Malay Applicant'],
+                    datasets: [{
+                        label: 'Callback Rate in Private Chinese Firms (%)',
+                        data: [28.1, 5.3],
+                        backgroundColor: ['#059669', '#9A3412']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { max: 35, ticks: { callback: v => v + '%' } } }
+                }
+            });
+        }
+
+        // Cash Plus Planner
+        function updateCashPlusPlanner() {
+            const scopeRadio = document.querySelector('input[name="cash-scope"]:checked').value;
+            const transferVal = parseInt(document.getElementById('cash-transfer-slider').value);
+
+            document.getElementById('cash-transfer-val').innerText = `RM ${transferVal} / mo`;
+
+            let familyCount = 5000;
+            let scopeText = "Covers 5,000 DBKL PPR pregnant mothers and infants.";
+
+            if (scopeRadio === 'urban-key') {
+                familyCount = 18000;
+                scopeText = "Covers 18,000 families in KL, Penang, and Johor PPR flats.";
+            } else if (scopeRadio === 'national') {
+                familyCount = 60000;
+                scopeText = "Covers 60,000 families across all nationwide PPR housing schemes.";
+            }
+
+            const annualBudgetMillion = ((familyCount * transferVal * 12) / 1000000).toFixed(1);
+
+            document.getElementById('cash-plus-budget-display').innerText = `RM ${annualBudgetMillion} Million`;
+            document.getElementById('cash-plus-scope-desc').innerText = `${scopeText} Direct cash + nutritional support.`;
+        }
+
+        // Policy Brief Exporter Modal
+        function exportPolicyBrief() {
+            const cgtRate = document.getElementById('cgt-rate').value;
+            const inheritanceEx = document.getElementById('inheritance-exemption').value;
+            const totalRev = document.getElementById('total-revenue-display').innerText;
+            const targetYear = document.getElementById('target-year-display').innerText;
+            const cashBudget = document.getElementById('cash-plus-budget-display').innerText;
+
+            const htmlContent = `
+=== MALAYSIA INCLUSIVE ECONOMY BLUEPRINT POLICY BRIEF ===
+Generated Simulation Output based on Dr. Muhammed Abdul Khalid's Framework
+
+1. PROGRESSIVE FISCAL REFORM SIMULATION:
+   - Capital Gains Tax Rate: ${cgtRate}%
+   - Inheritance Tax Exemption Threshold: RM ${inheritanceEx} Million
+   - Total Net Progressive Revenue Generated: ${totalRev} / year
+   - Policy Alternative: Fully replaces 6% regressive GST burden on working families.
+
+2. LIVABLE WAGE STAIRCASE ROADMAP:
+   - Annual Wage Increase Step: ${document.getElementById('increment-val').innerText}
+   - Estimated Year to Reach RM3,000 Living Wage: ${targetYear}
+   - Anti-Discrimination Intervention: Mandatory ethnic-blind resume screening proposed.
+
+3. PPR URBAN CHILD NUTRITION & SAFETY NET:
+   - Annual Program Cost: ${cashBudget}
+   - Interventions: First 1,000 Days child nutrition support + direct maternal cash transfer.
+
+4. 13MP MACRO TARGET REBUTTAL:
+   - Replaces 4.7% poverty target with <2.5% absolute floor.
+   - Target Gini ratio of 0.320 aligned with OECD benchmarks.
+            `;
+
+            document.getElementById('modalBriefContent').innerText = htmlContent;
+            document.getElementById('exportModal').classList.remove('hidden');
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.add('hidden');
+        }
+
+        // DOM Loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initDinaChart();
+            initFiscalChart();
+            initWageChart();
+            initAuditChart();
+            calculateFiscalEngine();
+            calculateWageRoadmap();
+            updateCashPlusPlanner();
+        });
+    </script>
+</body>
+</html>

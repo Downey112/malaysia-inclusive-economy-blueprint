@@ -1,0 +1,57 @@
+{
+"project_metadata": {
+"title": "Malaysia Inclusive Economy Blueprint Data Schema",
+"lead_researcher_inspiration": "Dr. Muhammed Abdul Khalid",
+"version": "1.0.0",
+"last_updated": "2026",
+"sources": [
+"Khalid, M. A. (2014). The Colour of Inequality.",
+"Lee, H. A., & Khalid, M. A. (2016). Discrimination of High Degree.",
+"Khalid, M. A., & Yang, L. (2019/2020). Distributional National Accounts (DINA) for Malaysia.",
+"UNICEF/UNFPA/DM Analytics (2020-2024). Living on the Edge / Families on the Edge Longitudinal Studies."
+]
+},
+"dina_inequality_series": {
+"years": $$2000, 2005, 2010, 2015, 2020, 2025$$,
+"top_10_percent_income_share": $$42.1, 44.5, 46.2, 47.8, 48.5, 49.2$$,
+"middle_40_percent_income_share": $$37.2, 36.8, 36.1, 35.5, 35.1, 34.8$$,
+"bottom_50_percent_income_share": $$20.7, 18.7, 17.7, 16.7, 16.4, 16.0$$,
+"wealth_share": {
+"top_1_percent": 32.4,
+"top_10_percent": 68.5,
+"bottom_50_percent": 3.2
+}
+},
+"graduate_hiring_audit": {
+"study_reference": "Lee & Khalid (2016)",
+"sample_resumes_sent": 3000,
+"callback_rates_pct": {
+"chinese_applicant_chinese_firm": 28.1,
+"chinese_applicant_malay_firm": 22.4,
+"malay_applicant_chinese_firm": 5.3,
+"malay_applicant_malay_firm": 13.7
+},
+"disparity_ratio": 5.3
+},
+"ppr_urban_poverty": {
+"study_reference": "UNICEF / DM Analytics (2023-2024)",
+"key_indicators": {
+"child_stunting_rate_pct": 21.8,
+"households_below_poverty_line_pct": 41.2,
+"families_skipping_meals_pct": 52.0,
+"female_headed_poverty_pct": 62.5
+},
+"target_schemes": {
+"dbkl_kl": { "families": 5000, "description": "Kuala Lumpur DBKL Low-Cost PPR Flats" },
+"key_urban": { "families": 18000, "description": "KL, Penang, and Johor Bahru Urban Core PPRs" },
+"national": { "families": 60000, "description": "Nationwide PPR & Public Low-Cost Housing" }
+}
+},
+"fiscal_yield_multipliers": {
+"cgt_per_percent_billion_rm": 1.25,
+"inheritance_base_yield_billion_rm": 18.5,
+"inheritance_exemption_decay_factor": 1.7,
+"pension_tax_per_percent_billion_rm": 0.28,
+"gst_6_percent_yield_billion_rm": 63.5
+}
+}
